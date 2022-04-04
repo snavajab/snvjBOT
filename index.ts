@@ -53,13 +53,6 @@ const client = new Client({
 
 let guild: Guild | null = null
 
-function addRole(role: typeof consts.roles[number], member: GuildMember) {
-    if (member && !member.roles.cache.has(role.roleID)) {
-        member.roles.add(role.roleID)
-        console.log(`Added ${role.name} role to ${member.user.username}`)
-    }
-}
-
 client.on('ready', async () => {
     const guilds = await client.guilds.fetch()
     guild = await guilds.get(consts.GUILD_ID)?.fetch() ?? null
@@ -77,6 +70,8 @@ async function refreshRoles() {
     const channel = await client.channels.fetch(consts.START_HERE_ID) as TextChannel
     const messages = await channel.messages.fetch() // this will cache the messages
 
+    if (guild.memberCount !== guild.members.cache.size) await guild.members.fetch()
+
     for (const game of consts.roles) {
         console.log(`Checking all users for ${game.name}`)
         const message = messages.get(game.messageID)
@@ -85,7 +80,11 @@ async function refreshRoles() {
 
         users?.filter(user => !user.bot).forEach(user => {
             const member = guild?.members.cache.get(user.id)
-            if (member && !member.roles.cache.has(game.roleID)) {
+            if (!member) {
+                console.log(`Could not find member ${user.username}`)
+                return
+            }
+            if (!member.roles.cache.has(game.roleID)) {
                 member.roles.add(game.roleID)
                 console.log(`Added ${game.name} role to ${user.username} while refreshing roles`)
             }
