@@ -1,8 +1,8 @@
-FROM node:16-alpine
+FROM node:18-alpine
 WORKDIR /app
 COPY package.json .
 COPY yarn.lock .
-RUN yarn --frozen-lockfile
+RUN yarn --immutable
 COPY . .
 RUN yarn build
 CMD ["yarn", "start"]
