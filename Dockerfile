@@ -5,4 +5,5 @@ COPY yarn.lock .
 RUN yarn --immutable
 COPY . .
 RUN yarn build
+EXPOSE 3000
 CMD ["yarn", "start"]
